@@ -14,47 +14,60 @@ class Node:
         if leaf == True:
             self.label = None
 
-# Create label here
-def get_unique_labels(data):
-    labels = [entry[1] for entry in data]
-    labels_counter = {}
-    for label in labels:
-        labels_counter[label] = labels_counter.get(label, 0) + 1
-    return labels_counter
+def get_labels(data):
+    # all the label here
+    labels = [num[1] for num in data]
+    # Create a list named lable.
+    label = []
+    # create a list of value.
+    value = []
+    # traverse for all elements
+    for x in labels:
+        # check if exists in unique_list or not
+        if x not in label:
+            label.append(x)
+    for x in label:
+        count = 0
+        for y in labels:
+            if x == y:
+                count = count + 1
+            else:
+                continue
+        value.append(count)
+    # Merge to form a dictionary 
+    return dict( zip ( label , value) )
 
+def check_length_attr(data):
+    check_len = [num[0] for num in data]
+    if len(check_len) == 1:
+        return True
+    else:
+        return False
 
-def check_x_equivalence(data):
-    X = [tuple(entry[0]) for entry in data]
-    X = set(X)
-    return len(X) == 1
-    
-
-def information_gain(X, idx):
-    c1 = X[:idx+1]
-    c2 = X[idx+1:]
-
-
+# entrophy to find the root (what attr has the highest score)
 def entropy(data):
-    N = len(data)
-    counter = get_unique_labels(data)
-    entropy = 0.0
-    for label, freq in counter.items():
-        p = float(freq) / N
-        entropy += - (p * math.log(p, 2))
-    return entropy
+    length = len(data)
+    counter = get_labels(data)
 
+    entropy = 0.0
+
+    for label, value  in counter.items():
+        a = float(value) / length
+        entropy += - (a * math.log(a, 2))
+
+    return entropy
 
 # split data
 def split_data(data, attr, splitval):
-    left = []
-    right = []
+    left_tree = []
+    right_tree = []
     for entry in data:
         x = entry[0]
         if x[attr] <= splitval:
-            left.append(entry)
+            left_tree.append(entry)
         else:
-            right.append(entry)
-    return (left, right)
+            right_tree.append(entry)
+    return (left_tree, right_tree)
 
 #function choose split data
 def choose_split(data):
@@ -81,11 +94,10 @@ def choose_split(data):
     
     return (best_attr, best_split)
 
-
 def DTL(data, minleaf):
     N = len(data)
-    labels_count = get_unique_labels(data)
-    if N <= minleaf or len(labels_count) == 1 or check_x_equivalence(data):
+    labels_count = get_labels(data)
+    if N <= minleaf or len(labels_count) == 1 or check_length_attr(data):
         leaf_node = Node(leaf=True)
         max_freq = 0
         label = ""
@@ -109,7 +121,6 @@ def DTL(data, minleaf):
     node.left = DTL(left_data, minleaf)
     node.right = DTL(right_data, minleaf)
     return node
-
 
 def predict(node, data):
     while not node.leaf:
@@ -147,14 +158,20 @@ def main():
         X = [float(val) for val in line.strip().split()]
         # Push to test array
         test_array.append(X)
+
+    #print(get_unique_labels(train_array))
+    #print(check_length_attr(train_array))
+    #print(entropy(train_array))
+    print(choose_split(train_array))
     
+    '''
     # the Decision tree learning model here
     best_value = DTL(train_array, minleaf) # find best attribute, best split value
 
     for test_data in test_array:
         # run model against testing data
         print(predict(best_value, test_data))
-    
+    '''
 if __name__ == '__main__':
     main()
    
